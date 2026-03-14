@@ -6,8 +6,12 @@ import math
 import struct
 from pathlib import Path
 from bs4 import BeautifulSoup
-from tokenizer import get_token_frequencies
-from InvertedIndex import FrequencyList
+try:
+    from .tokenizer import get_token_frequencies
+    from .InvertedIndex import FrequencyList
+except ImportError:
+    from tokenizer import get_token_frequencies
+    from InvertedIndex import FrequencyList
 from typing import Dict, List, Tuple
 
 """

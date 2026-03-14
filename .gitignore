@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+.venv/
+frontier_state.db
+crawled_data/
+postings.bin
+vocab.json
+doc_map.json
+vocab_seg_*.json
+postings_seg_*.bin
+doc_map_seg_*.json
+index_deliverables.txt
