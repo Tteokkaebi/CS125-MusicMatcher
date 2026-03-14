@@ -2,7 +2,10 @@
 from bs4 import BeautifulSoup
 from nltk.stem import PorterStemmer
 import re
-from InvertedIndex import FrequencyList
+try:
+    from .InvertedIndex import FrequencyList
+except ImportError:
+    from InvertedIndex import FrequencyList
 
 ps = PorterStemmer()
 

@@ -44,26 +44,32 @@ def run_indexer():
 def run_search():
     searcher = Searcher()
     print("Enter queries (empty line to exit):")
-    while True:
-        query = input("> ").strip()
-        if not query:
-            break
+    try:
+        while True:
+            query = input("> ").strip()
+            if not query:
+                break
 
-        results = searcher.search(query, k=10)
-        if not results:
-            print("No results.")
-            continue
+            results = searcher.search(query, k=10)
+            if not results:
+                print("No results.")
+                continue
 
-        for rank, (doc_id, score, meta) in enumerate(results, start=1):
-            url = meta.get("url", "UNKNOWN")
-            product = meta.get("product") or {}
-            name = product.get("name") or "(no name)"
-            brand = product.get("brand") or ""
-            price = product.get("price")
-            price_str = f"${price:.2f}" if isinstance(price, (int, float)) else ""
-            print(f"{rank}. {name} {brand} {price_str} [{score:.4f}]")
-            print(f"   {url}")
-        print()
+            for rank, (_, score, meta) in enumerate(results, start=1):
+                url = meta.get("url", "UNKNOWN")
+                product = meta.get("product") or {}
+                name = product.get("name") or "(no name)"
+                brand = product.get("brand") or ""
+                price = product.get("price")
+                price_str = f"${price:.2f}" if isinstance(price, (int, float)) else ""
+                print(f"{rank}. {name} {brand} {price_str} [{score:.4f}]")
+                print(f"   {url}")
+                why = meta.get("why") or []
+                if why:
+                    print(f"   why: {', '.join(why)}")
+            print()
+    finally:
+        searcher.close()
 
 
 def main():
@@ -88,7 +94,7 @@ def main():
             print("Goodbye.")
             break
         else:
-            print("Invalid choice. Please enter 1–4.")
+            print("Invalid choice. Please enter 1-4.")
 
 
 if __name__ == "__main__":

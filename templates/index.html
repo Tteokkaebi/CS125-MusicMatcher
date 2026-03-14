@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MusicMatcher</title>
+  <style>
+    :root {
+      --bg: #f5f7f9;
+      --card: #ffffff;
+      --line: #d9e0e7;
+      --text: #1b2a3a;
+      --muted: #5f6b7a;
+      --accent: #216d8b;
+    }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Georgia, "Times New Roman", serif;
+    }
+    .wrap {
+      max-width: 1050px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 1.9rem;
+    }
+    p {
+      margin: 4px 0;
+      color: var(--muted);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+    label {
+      font-size: 0.88rem;
+      color: var(--muted);
+      display: block;
+      margin-bottom: 4px;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      box-sizing: border-box;
+      font-size: 0.92rem;
+    }
+    button {
+      background: var(--accent);
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+    }
+    button.secondary {
+      background: #415a74;
+    }
+    .row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+    .row form {
+      min-width: 180px;
+    }
+    .pill {
+      display: inline-block;
+      background: #e8eef4;
+      color: #294259;
+      border-radius: 999px;
+      padding: 4px 10px;
+      margin: 3px 6px 0 0;
+      font-size: 0.85rem;
+    }
+    .res {
+      border-top: 1px solid var(--line);
+      padding-top: 10px;
+      margin-top: 10px;
+    }
+    .res h3 {
+      margin: 0 0 4px;
+      font-size: 1.05rem;
+    }
+    .score {
+      color: #25485f;
+      font-weight: 600;
+      font-size: 0.92rem;
+    }
+    .why {
+      color: #3c556d;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>MusicMatcher</h1>
+      <p>Search and rerank guitars by query, budget, profile, and context.</p>
+      <p>Index status: <strong>{{ "ready" if has_index else "missing" }}</strong></p>
+      {% if notice %}
+      <p><strong>{{ notice }}</strong></p>
+      {% endif %}
+    </div>
+
+    <div class="card">
+      <form method="post">
+        <input type="hidden" name="action" value="search" />
+        <div class="grid">
+          <div>
+            <label>Query</label>
+            <input name="query" value="{{ form.query }}" placeholder="fender stratocaster" />
+          </div>
+          <div>
+            <label>Budget Min</label>
+            <input type="number" step="0.01" name="budget_min" value="{{ form.budget_min }}" placeholder="300" />
+          </div>
+          <div>
+            <label>Budget Max</label>
+            <input type="number" step="0.01" name="budget_max" value="{{ form.budget_max }}" placeholder="1200" />
+          </div>
+          <div>
+            <label>Preferred Brand</label>
+            <input name="preferred_brand" value="{{ form.preferred_brand }}" placeholder="Fender" />
+          </div>
+          <div>
+            <label>Experience Level</label>
+            <select name="experience_level">
+              <option value="" {% if form.experience_level == "" %}selected{% endif %}>Any</option>
+              <option value="beginner" {% if form.experience_level == "beginner" %}selected{% endif %}>Beginner</option>
+              <option value="intermediate" {% if form.experience_level == "intermediate" %}selected{% endif %}>Intermediate</option>
+              <option value="advanced" {% if form.experience_level == "advanced" %}selected{% endif %}>Advanced</option>
+            </select>
+          </div>
+          <div>
+            <label>Retailer Context</label>
+            <select name="retailer">
+              <option value="" {% if form.retailer == "" %}selected{% endif %}>Any</option>
+              <option value="sweetwater" {% if form.retailer == "sweetwater" %}selected{% endif %}>Sweetwater</option>
+              <option value="guitarcenter" {% if form.retailer == "guitarcenter" %}selected{% endif %}>Guitar Center</option>
+            </select>
+          </div>
+          <div>
+            <label>Top K</label>
+            <input type="number" min="1" max="25" name="top_k" value="{{ form.top_k }}" />
+          </div>
+          <div>
+            <label>Remember Preferred Brand</label>
+            <select name="remember_brand">
+              <option value="off" {% if not form.remember_brand %}selected{% endif %}>No</option>
+              <option value="on" {% if form.remember_brand %}selected{% endif %}>Yes</option>
+            </select>
+          </div>
+        </div>
+        <div class="row">
+          <button type="submit">Run Search</button>
+        </div>
+      </form>
+
+      <div class="row">
+        <form method="post">
+          <input type="hidden" name="action" value="seed_demo" />
+          <button class="secondary" type="submit">Create Demo Dataset</button>
+        </form>
+        <form method="post">
+          <input type="hidden" name="action" value="rebuild_index" />
+          <button class="secondary" type="submit">Build / Rebuild Index</button>
+        </form>
+        <form method="post">
+          <input type="hidden" name="action" value="clear_profile" />
+          <button class="secondary" type="submit">Reset Profile</button>
+        </form>
+      </div>
+
+      <div style="margin-top:10px;">
+        <label>Saved Brand Profile</label>
+        {% if saved_brands %}
+          {% for brand in saved_brands %}
+            <span class="pill">{{ brand }}</span>
+          {% endfor %}
+        {% else %}
+          <p>None yet.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 style="margin:0 0 4px;">Results</h2>
+      {% if results %}
+        {% for item in results %}
+          <div class="res">
+            <h3>{{ item.rank }}. {{ item.name }} {{ item.brand }}</h3>
+            <p>
+              {% if item.price is not none %}${{ "%.2f"|format(item.price) }}{% endif %}
+              {% if item.rating is not none %} | rating {{ item.rating }}{% endif %}
+              {% if item.reviews is not none %} | {{ item.reviews }} reviews{% endif %}
+            </p>
+            <p class="score">score: {{ "%.4f"|format(item.score) }}</p>
+            <p><a href="{{ item.url }}" target="_blank">{{ item.url }}</a></p>
+            {% if item.why %}
+              <p class="why">why: {{ item.why|join(', ') }}</p>
+            {% endif %}
+          </div>
+        {% endfor %}
+      {% else %}
+        <p>No results yet. Build index and run a search.</p>
+      {% endif %}
+    </div>
+  </div>
+</body>
+</html>

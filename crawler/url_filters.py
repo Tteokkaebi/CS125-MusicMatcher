@@ -1,8 +1,13 @@
 # crawler/url_filters.py
 
 from urllib.parse import urlparse, urldefrag
-from robots import RobotsManager
-from scraper import is_product_page, is_category_page
+
+try:
+    from .robots import RobotsManager
+    from .scraper import is_product_page, is_category_page
+except ImportError:
+    from robots import RobotsManager
+    from scraper import is_product_page, is_category_page
 
 robots = RobotsManager()
 
@@ -18,6 +23,7 @@ BLOCKED_KEYWORDS = [
     "search", "track", "privacy", "terms", "policy",
     "gift-card", "wishlist", "compare", "help", "support",
 ]
+
 
 def is_valid(url: str) -> bool:
     """

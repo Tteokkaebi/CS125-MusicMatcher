@@ -6,9 +6,14 @@ import time
 from utils.download import download
 from utils import get_logger
 
-from url_filters import is_valid
-from robots import RobotsManager
-import scraper
+try:
+    from .url_filters import is_valid
+    from .robots import RobotsManager
+    from . import scraper
+except ImportError:
+    from url_filters import is_valid
+    from robots import RobotsManager
+    import scraper
 
 
 class Worker(Thread):
@@ -53,9 +58,9 @@ class Worker(Thread):
             # Scrape page
             result = scraper.scraper(url, resp)
 
-            # If scraper returns a Product object → nothing to add to frontier
+            # If scraper returns a Product object -> nothing to add to frontier
             if isinstance(result, list):
-                # Category page → add links
+                # Category page -> add links
                 for link in result:
                     if is_valid(link):
                         self.frontier.add_url(link)

@@ -5,7 +5,7 @@ import json
 from urllib.parse import urljoin, urlparse, urldefrag
 from bs4 import BeautifulSoup
 
-from indexer_searcher.ProductSchema import Product
+from indexer_searcher.product import Product
 
 BASE_OUTPUT = "crawled_data"
 
